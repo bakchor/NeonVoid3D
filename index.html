@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>Void Fighter 3D — Space Shooter Gratuit</title>
+<meta name="description" content="Void Fighter 3D : pilote ton vaisseau dans l'espace, détruis les ennemis IA et survive le plus longtemps. Jeu de tir spatial 3D gratuit dans le navigateur.">
+<meta name="keywords" content="void fighter 3d, space shooter, jeu vaisseau spatial, jeu 3d gratuit, browser game, space game, neon space shooter">
+<meta property="og:title" content="Void Fighter 3D — Space Shooter Neon">
+<meta property="og:description" content="Pilote ton vaisseau, détruis les ennemis. Jeu 3D gratuit !">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#000014">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='16' fill='%23000014'/><polygon points='50,10 65,70 50,58 35,70' fill='%2300ffff'/><polygon points='50,10 78,55 65,48' fill='%2300aacc'/><polygon points='50,10 22,55 35,48' fill='%2300aacc'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="scanlines" aria-hidden="true"></div>
+
+<!-- PUB HAUTE -->
+<header class="ad-strip">
+  <div class="ad-unit" id="ad-top"><span class="ad-lbl">ESPACE PUBLICITAIRE</span></div>
+</header>
+
+<main class="site-layout">
+
+  <!-- PUB GAUCHE -->
+  <aside class="ad-side ad-side--left">
+    <div class="ad-unit" id="ad-left"><span class="ad-lbl ad-lbl--v">PUB</span></div>
+  </aside>
+
+  <!-- ZONE JEU -->
+  <section class="game-col" id="game-col">
+    <div class="game-frame" id="game-container">
+
+      <!-- ═══ MENU ═══ -->
+      <div class="screen" id="screen-menu">
+        <canvas class="bg-canvas" id="menu-bg"></canvas>
+        <div class="menu-content">
+          <div class="logo">
+            <div class="logo__top">VOID</div>
+            <div class="logo__btm">FIGHTER</div>
+            <div class="logo__tag">— 3D SPACE SHOOTER —</div>
+          </div>
+          <div class="menu-stats">
+            <div class="stat-block">
+              <span class="stat-block__lbl">MEILLEUR SCORE</span>
+              <span class="stat-block__val" id="menu-hs">0</span>
+            </div>
+            <div class="stat-block">
+              <span class="stat-block__lbl">VAGUE MAX</span>
+              <span class="stat-block__val" id="menu-wave">0</span>
+            </div>
+          </div>
+          <button class="cta-btn" id="btn-start">
+            <span class="cta-btn__glow"></span>▶&nbsp;JOUER
+          </button>
+          <div class="ctrl-hints">
+            <div class="ctrl-hints__row">
+              <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>
+              <span>/ Flèches — Déplacer</span>
+            </div>
+            <div class="ctrl-hints__row">
+              <kbd>ESPACE</kbd><span>/ Clic — Tirer</span>
+            </div>
+            <div class="ctrl-hints__row ctrl-hints__row--mobile">
+              📱 Joystick gauche + bouton FIRE droit
+            </div>
+          </div>
+          <p class="tagline">"Défends le vide. Détruis tout."</p>
+          <div class="util-bar">
+            <button class="util-btn" id="btn-snd" title="Son">🔊</button>
+            <button class="util-btn" id="btn-fs"  title="Plein écran">⛶</button>
+            <button class="util-btn" id="btn-rst" title="Reset">↺</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ JEU ═══ -->
+      <div class="screen screen--game" id="screen-game" style="display:none">
+        <div class="hud" id="hud">
+          <div class="hud__left">
+            <span class="hud__lbl">SCORE</span>
+            <span class="hud__val" id="hud-score">0</span>
+          </div>
+          <div class="hud__center">
+            <span class="hud__wave" id="hud-wave">VAGUE 1</span>
+            <div class="shield-bar">
+              <div class="shield-bar__fill" id="shield-bar"></div>
+            </div>
+            <span class="hud__hp" id="hud-hp">❤❤❤</span>
+          </div>
+          <div class="hud__right">
+            <span class="hud__lbl">RECORD</span>
+            <span class="hud__val" id="hud-hs">0</span>
+          </div>
+        </div>
+        <canvas id="game-canvas"></canvas>
+        <div class="ingame-btns">
+          <button class="util-btn" id="btn-pause">⏸</button>
+          <button class="util-btn" id="btn-fs2">⛶</button>
+        </div>
+      </div>
+
+      <!-- ═══ PAUSE ═══ -->
+      <div class="screen screen--overlay" id="screen-pause" style="display:none">
+        <div class="panel">
+          <h2 class="panel__title">PAUSE</h2>
+          <button class="cta-btn cta-btn--sm" id="btn-resume">▶ REPRENDRE</button>
+          <button class="ghost-btn" id="btn-quit-p">✕ QUITTER</button>
+        </div>
+      </div>
+
+      <!-- ═══ GAME OVER ═══ -->
+      <div class="screen screen--overlay screen--go" id="screen-go" style="display:none">
+        <div class="panel panel--go">
+          <div class="go-title">
+            <span class="go-title__a">GAME</span>
+            <span class="go-title__b">OVER</span>
+          </div>
+          <div class="go-chips">
+            <div class="chip">
+              <div class="chip__lbl">SCORE</div>
+              <div class="chip__val" id="go-score">0</div>
+            </div>
+            <div class="chip">
+              <div class="chip__lbl">VAGUE</div>
+              <div class="chip__val" id="go-wave">1</div>
+            </div>
+            <div class="chip chip--gold" id="go-rec" style="display:none">
+              <div class="chip__lbl">🏆 RECORD</div>
+              <div class="chip__val" id="go-hs">0</div>
+            </div>
+          </div>
+          <div class="go-actions">
+            <button class="cta-btn" id="btn-retry">↺ REJOUER</button>
+            <div class="go-socials">
+              <button class="soc-btn soc-btn--share" id="btn-share">📤</button>
+              <button class="soc-btn soc-btn--def"   id="btn-def">⚡</button>
+            </div>
+          </div>
+          <!-- REWARDED VIDEO -->
+          <div class="rewarded" id="rewarded-zone">
+            <button class="rew-btn" id="btn-rew" onclick="triggerRewardedAd()">
+              👁 Voir une pub → <strong>CONTINUER</strong>
+            </button>
+          </div>
+          <button class="ghost-btn ghost-btn--sm" id="btn-menu">← MENU</button>
+        </div>
+      </div>
+
+      <!-- MODAL PARTAGE -->
+      <div class="modal-veil" id="modal-share" style="display:none">
+        <div class="modal-box">
+          <div class="modal-box__ttl">📤 MON SCORE</div>
+          <canvas id="share-canvas" width="600" height="370"></canvas>
+          <div class="modal-box__row">
+            <button class="cta-btn cta-btn--sm" id="btn-dl">⬇ Télécharger</button>
+            <button class="ghost-btn" id="btn-cls">✕ Fermer</button>
+          </div>
+          <p id="share-ok" style="display:none;color:#00ffff;font-size:13px;text-align:center">✅ Lien copié !</p>
+        </div>
+      </div>
+
+      <div class="toast" id="toast"></div>
+    </div><!-- /game-frame -->
+
+    <!-- CONTRÔLES MOBILES -->
+    <div class="mobile-ctrl" id="mobile-ctrl" style="display:none">
+      <div class="joystick-wrap">
+        <div class="joystick-base" id="joy-base">
+          <div class="joystick-knob" id="joy-knob"></div>
+        </div>
+        <span class="ctrl-lbl">DÉPLACER</span>
+      </div>
+      <div class="fire-wrap">
+        <button class="fire-btn" id="btn-fire-mobile">
+          <span class="fire-btn__ring"></span>
+          FIRE
+        </button>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- PUB DROITE -->
+  <aside class="ad-side ad-side--right">
+    <div class="ad-unit" id="ad-right"><span class="ad-lbl ad-lbl--v">PUB</span></div>
+  </aside>
+
+</main>
+
+<!-- PUB BASSE -->
+<footer class="site-foot">
+  <div class="ad-strip">
+    <div class="ad-unit" id="ad-bot"><span class="ad-lbl">ESPACE PUBLICITAIRE</span></div>
+  </div>
+  <div class="foot-cr">VOID FIGHTER 3D © 2025</div>
+</footer>
+
+<!-- INTERSTITIEL -->
+<div class="interstitial" id="interstitial" style="display:none">
+  <div class="interstitial__box">
+    <div class="interstitial__n" id="int-n">5</div>
+    <div class="ad-unit int-ad" id="ad-int">
+      <span class="ad-lbl">PUBLICITÉ</span>
+      <p style="color:#444;font-size:13px;margin-top:6px">Prochaine partie dans <span id="int-c">5</span>s…</p>
+    </div>
+    <button class="cta-btn" id="btn-int" style="display:none">▶ JOUER</button>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
